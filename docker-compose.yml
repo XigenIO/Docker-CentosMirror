@@ -1,0 +1,30 @@
+version: '3.4'
+
+volumes:
+  centosmirror-data:
+
+services:
+    rsync:
+        image: xigen/centosmirror
+        restart: always
+        tty: true
+        environment:
+            source_url: rsync://mirror.freethought-internet.co.uk/centos/7/
+
+            # An HTTP(S) URL pointing to the 'lastupdate' file on your chosen mirror.
+            # If you are a tier 1 mirror use: http://rsync.archlinux.org/lastupdate
+            # Otherwise use the HTTP(S) URL from your chosen mirror.
+            lastupdate_url: https://mirror.freethought-internet.co.uk/centos/timestamp.txt
+        build:
+            context: ./
+            dockerfile: Dockerfile
+        volumes:
+          - centosmirror-data:/data
+
+    httpd:
+        restart: always
+        image: xigen/nginx
+        volumes:
+          - centosmirror-data:/var/www/public
+        ports:
+            - "443:443"
